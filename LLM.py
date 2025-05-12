@@ -14,6 +14,7 @@ prolog.consult("project.pl")
 
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 
+# Save the state of the query to effectively retain user context
 state = {
     'location': 'unknown',
     'price_range': 'unknown',
@@ -23,12 +24,12 @@ state = {
     'age_group': 'unknown',
     'retry': False
 }
-
 shown_ids = set()
 prev_suggestions = set()
 
 messages = []
 
+# Extract the necessary data for the query pipeline
 def safe_eval(arg):
     try:
         val = ast.literal_eval(arg)
@@ -41,10 +42,12 @@ def safe_eval(arg):
     except Exception:
         return [arg.strip()]
 
+# Add a message to the history, with a limit enforcement
 def add_message(msg):
     messages.append(msg)
     return messages[-MESSAGE_HISTORY_LIMIT:]
 
+# Parse the predicate string returned by the LLM
 def parse_predicates(response_text):
     global state
     try:
@@ -68,6 +71,7 @@ def parse_predicates(response_text):
         print("Bot: Sorry, I couldn't understand that properly.")
         return None
 
+# Call prolog for the relax pipeline
 def call_prolog_relax(messages):
     excluded_ids_str = "[" + ",".join([str(i) for i in shown_ids]) + "]"
     prev_suggestions_str = "[" + ",".join([str(i) for i in prev_suggestions]) + "]"
@@ -90,6 +94,7 @@ def call_prolog_relax(messages):
 
     return messages
 
+# Call prolog for the query pipeline
 def call_prolog_query(messages, q):
     query = f"query({q[0]}, {q[1]}, Results)"
     try:
@@ -108,6 +113,7 @@ def call_prolog_query(messages, q):
 
     return messages
 
+# Call prolog for the recommendation pipeline
 def call_prolog_recommend(messages):
     global state
     if state['retry'] == True:
@@ -148,6 +154,7 @@ def call_prolog_recommend(messages):
             print(f"Bot: Error occurred: {e}")
     return messages
 
+# Direct the user query to the appropriate pipeline
 def control_logic(messages):
     prompt = ChatPromptTemplate.from_messages(
         [
