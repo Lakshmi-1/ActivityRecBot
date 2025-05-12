@@ -7,7 +7,7 @@ ActivityRecBot is designed to assist users in discovering suitable activities in
 2) Get an Free API key from [Groq](https://console.groq.com/keys)
 3) Clone the repo
 4) Configure a .env file with your GROQ_API_KEY
-5) Run 'pip install requirements.txt'
+5) Run 'pip install -r requirements.txt'
 6) Run 'python LLM.py'
 7) Happy Chatting :)
 
